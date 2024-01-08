@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
   openGraph: {
     images: [
-      "https://res.cloudinary.com/derbreilm/image/upload/v1703724471/MetaOG_Image_ybcojw.png",
+      "https://res.cloudinary.com/derbreilm/image/upload/v1704735511/MetaOG_Image_ypcflp.png",
     ],
     url: "https://app-wishme.vercel.app",
   },
