@@ -1,4 +1,4 @@
-# Wishme Monorepo
+# Expi Monorepo
 
 ## How to run
 
