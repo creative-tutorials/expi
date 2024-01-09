@@ -43,7 +43,15 @@ const validateAuth = (req: Request, res: Response, next: NextFunction) => {
   else res.status(401).send({ error: "Unauthorized" });
 };
 
-const limiter = rateLimit({
+const reqLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes api rate limit
+  limit: 20, // limit each IP to 20 requests per windowMs
+  message: { error: "Too many requests, please try again after 10 minutes." },
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
+
+const resLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes api rate limit
   limit: 20, // limit each IP to 20 requests per windowMs
   message: { error: "Too many requests, please try again after 5 minutes." },
@@ -51,7 +59,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use(limiter); // apply rate limiting to all requests
+// app.use(resLimiter); // apply rate limiting to all requests
 
 app.get("/status", async (_, res) => {
   res.send("OK");
@@ -100,6 +108,7 @@ const checkBillRequest = (req: Request, res: Response, next: NextFunction) => {
 
 app.post(
   "/api/upload",
+  reqLimiter,
   validateAuth,
   checkFieldValue,
   async (req: Request, res: Response) => {
@@ -116,21 +125,27 @@ app.post(
   }
 );
 
-app.get("/api/expense", validateAuth, async (req: Request, res: Response) => {
-  const { userid } = req.headers as CustomHeaders;
+app.get(
+  "/api/expense",
+  resLimiter,
+  validateAuth,
+  async (req: Request, res: Response) => {
+    const { userid } = req.headers as CustomHeaders;
 
-  try {
-    const data = await fetchExpenses(userid);
+    try {
+      const data = await fetchExpenses(userid);
 
-    res.send(data);
-  } catch (err: any) {
-    console.log("err", err);
-    res.status(500).send({ error: err.message });
+      res.send(data);
+    } catch (err: any) {
+      console.log("err", err);
+      res.status(500).send({ error: err.message });
+    }
   }
-});
+);
 
 app.delete(
   "/api/expense/:id",
+  reqLimiter,
   validateAuth,
   checkRecordField,
   async (req: Request, res: Response) => {
@@ -148,6 +163,7 @@ app.delete(
 
 app.post(
   "/api/bill/:userid",
+  reqLimiter,
   validateAuth,
   checkBillRequest,
   async (req: Request, res: Response) => {

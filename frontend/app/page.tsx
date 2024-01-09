@@ -4,9 +4,8 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useUser, SignedIn, SignedOut } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import { getAPIURL } from "@/hooks/api-url";
-import Link from "next/link";
+import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/main/dashboard/sidebar";
 import { Header } from "@/components/layout/main/dashboard/header";
 
@@ -96,7 +95,7 @@ export default function Home() {
   });
   const [rowSelection, setRowSelection] = useState({});
   const [count, setCount] = useState(0);
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const { isSignedIn, user } = useUser();
   const [formValue, setFormValue] = useState({
     title: "",
@@ -241,16 +240,21 @@ export default function Home() {
                 },
               })
               .then((res) => {
-                toast({
-                  description: res.data.data,
+                toast.success(res.data.data, {
+                  action: {
+                    label: "Close",
+                    onClick: () => console.log("Toast closed"),
+                  },
                 });
                 fetchExpenses();
               })
               .catch((err) => {
                 console.error(err.response);
-                toast({
-                  variant: "destructive",
-                  description: err.response.data.error,
+                toast.error(err.response.data.error, {
+                  action: {
+                    label: "Retry",
+                    onClick: () => deleteExpense(),
+                  },
                 });
               });
           }
@@ -317,8 +321,11 @@ export default function Home() {
         }
       )
       .then(async (res) => {
-        toast({
-          description: res.data.data,
+        toast.success(res.data.data, {
+          action: {
+            label: "Close",
+            onClick: () => console.log("Toast closed"),
+          },
         });
         fetchExpenses();
         setFormValue((prev) => ({
@@ -334,9 +341,12 @@ export default function Home() {
       .catch(async (err: Err) => {
         console.error(err.response);
         setFormValue((prev) => ({ ...prev, isPending: false }));
-        toast({
-          variant: "destructive",
-          description: err.response.data.error,
+
+        toast.error(err.response.data.error, {
+          action: {
+            label: "Retry",
+            onClick: () => uploadData(),
+          },
         });
       });
   };
@@ -488,7 +498,7 @@ export default function Home() {
                     <DialogFooter>
                       <Button
                         type="submit"
-                        className="bg-indigo-700 hover:bg-indigo-600 flex items-center gap-2"
+                        className="bg-indigo-700 hover:bg-indigo-600 flex items-center gap-2 select-none"
                         onClick={uploadData}
                         disabled={formValue.isPending}
                       >
