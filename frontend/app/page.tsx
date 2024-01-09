@@ -516,7 +516,7 @@ export default function Home() {
               </div>
               <div id="middle">
                 <hgroup>
-                  <h2 className="text-xl font-medium">Expense table</h2>
+                  <h2 className="text-xl font-medium">Expense table.</h2>
                 </hgroup>
                 <div id="list">
                   <div className="w-full">
