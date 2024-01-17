@@ -14,8 +14,32 @@ const { title } = Astro.props;
       name="description"
       content="A simple expense tracker to help you save money."
     />
+    <meta
+      name="keywords"
+      content="expro,expro,cart,expense tracker,next.js,save money"
+    />
+    <meta property="og:title" content={title} />
+    <meta
+      property="og:description"
+      content="A simple expense tracker to help you save money."
+    />
+    <meta property="og:url" content="https://site-expi.vercel.app" />
+    <meta
+      property="og:image"
+      content="https://res.cloudinary.com/derbreilm/image/upload/v1705492085/expi_twitter_og_image_olj7oi.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta
+      name="twitter:description"
+      content="A simple expense tracker to help you save money."
+    />
+    <meta
+      name="twitter:image"
+      content="https://res.cloudinary.com/derbreilm/image/upload/v1705492085/expi_twitter_og_image_olj7oi.png"
+    />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/icon.png" />
+    <link rel="icon" type="image/png" href="/icon.png" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
