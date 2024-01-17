@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "F:/Code 2024/monorepos/expi/website",
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
