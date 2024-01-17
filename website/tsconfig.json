@@ -2,9 +2,7 @@
   "compilerOptions": {
     "baseUrl": "F:/Code 2024/monorepos/expi/website",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "react"
