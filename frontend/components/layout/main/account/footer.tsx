@@ -8,7 +8,7 @@ import {
 import Link from "next/link";
 export function Footer() {
   return (
-    <footer className="md:hidden lg:hidden block fixed bottom-12 left-1/2 right-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-sm rounded-md bg-zinc-950 border border-zinc-800 shadow-md p-5">
+    <footer className="md:hidden lg:hidden block fixed bottom-12 left-1/2 right-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-xs rounded-md bg-zinc-950 border border-zinc-800 shadow-md p-5">
       <div id="icons" className="flex items-center justify-between">
         <div id="icon">
           <TooltipProvider>

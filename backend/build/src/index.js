@@ -86,7 +86,7 @@ app.post("/api/upload", reqLimiter, validateAPIKey, checkFieldValue, async (req,
     const { userid } = req.headers;
     try {
         const data = await UploadExpense(userid, title, category, price, code);
-        res.send({ data });
+        res.status(201).send({ data });
         console.log("data", { data });
     }
     catch (err) {
@@ -98,7 +98,7 @@ app.get("/api/expense", resLimiter, validateAPIKey, async (req, res) => {
     const { userid } = req.headers;
     try {
         const data = await fetchExpenses(userid);
-        res.status(201).send(data);
+        res.send(data);
     }
     catch (err) {
         console.log("err", err);
@@ -125,10 +125,10 @@ app.post("/api/budget", reqLimiter, validateAPIKey, validateUserAuth, checkBudge
         const existingBudget = await getBudget(userid);
         if (existingBudget) {
             const updatedBudget = await updateBudget(userid, budget);
-            res.send({ updatedBudget });
+            res.status(200).send({ updatedBudget });
         }
         const createdBudget = await createBudget(userid, username, budget, code);
-        res.status(201).send({ createdBudget }); //* 201 created
+        res.status(201).send({ createdBudget });
     }
     catch (err) {
         console.log(err);

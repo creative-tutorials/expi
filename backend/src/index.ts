@@ -115,7 +115,7 @@ app.post(
     const { userid } = req.headers as CustomHeaders;
     try {
       const data = await UploadExpense(userid, title, category, price, code);
-      res.send({ data });
+      res.status(201).send({ data });
       console.log("data", { data });
     } catch (err: any) {
       res.status(500).send({ error: err.message });
@@ -134,7 +134,7 @@ app.get(
     try {
       const data = await fetchExpenses(userid);
 
-      res.status(201).send(data);
+      res.send(data);
     } catch (err: any) {
       console.log("err", err);
       res.status(500).send({ error: err.message });
@@ -180,10 +180,10 @@ app.post(
       const existingBudget = await getBudget(userid);
       if (existingBudget) {
         const updatedBudget = await updateBudget(userid, budget);
-        res.send({ updatedBudget });
+        res.status(200).send({ updatedBudget });
       }
       const createdBudget = await createBudget(userid, username, budget, code);
-      res.status(201).send({ createdBudget }); //* 201 created
+      res.status(201).send({ createdBudget });
     } catch (err) {
       console.log(err);
     }

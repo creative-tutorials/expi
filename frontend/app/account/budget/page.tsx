@@ -1,5 +1,6 @@
 "use client";
-import axios from "axios";
+import Axios from "axios";
+import { setupCache } from "axios-cache-interceptor";
 import { useUser } from "@clerk/nextjs";
 import { getAPIURL } from "@/hooks/api-url";
 import { useCountryCodes } from "@/hooks/country-codes";
@@ -13,6 +14,9 @@ import { Eye, EyeOff, Clipboard, ClipboardCheckIcon, Ban } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+const instance = Axios.create();
+const axios = setupCache(instance);
 
 import {
   Dialog,
@@ -183,22 +187,21 @@ export default function Cloud() {
     if (!isSignedIn) return;
     setFormValue((prev) => ({ ...prev, isPending: true }));
     const url = getAPIURL();
-    axios
-      .post(
-        `${url}/api/budget`,
-        {
-          username: user.firstName + " " + user.lastName,
-          budget: formValue.amount,
-          code: formValue.code,
+    Axios.post(
+      `${url}/api/budget`,
+      {
+        username: user.firstName + " " + user.lastName,
+        budget: formValue.amount,
+        code: formValue.code,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          apikey: process.env.NEXT_PUBLIC_API_KEY,
+          userid: user.id,
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            apikey: process.env.NEXT_PUBLIC_API_KEY,
-            userid: user.id,
-          },
-        }
-      )
+      }
+    )
       .then(async (res) => {
         const data = res.data;
 
@@ -207,7 +210,14 @@ export default function Cloud() {
       })
       .catch(async (err) => {
         console.error(err.response);
+        const error = err.response.data.error;
         setFormValue((prev) => ({ ...prev, isPending: false }));
+        toast.error(error, {
+          action: {
+            label: "Close",
+            onClick: () => console.info("Toast closed"),
+          },
+        });
       });
   };
 
@@ -239,7 +249,7 @@ export default function Cloud() {
       >
         <div
           id="top"
-          className="flex md:gap-0 lg:gap-0 gap-3 flex-wrap justify-between"
+          className="flex md:gap-0 lg:gap-0 gap-3 px-2 flex-wrap items-center justify-between"
         >
           <Dialog>
             <DialogTrigger asChild>
@@ -263,6 +273,8 @@ export default function Cloud() {
                     id="number"
                     placeholder="Budget amount"
                     type="number"
+                    value={formValue.amount}
+                    min="0"
                     className="col-span-3"
                     autoComplete="off"
                     disabled={formValue.isPending}
@@ -309,7 +321,9 @@ export default function Cloud() {
           </Dialog>
           <div id="budget_nexus">
             <h1 className="md:text-2xl lg:text-2xl text-lg font-medium">
-              Budget: <span>{account.budget ? account.budget : null}</span>
+              <span>
+                {account.budget ? account.budget : "Loading amount..."}
+              </span>
             </h1>
           </div>
         </div>
@@ -413,11 +427,18 @@ export default function Cloud() {
                     <div
                       id="progress"
                       style={{ width: `${item.value}%` }}
-                      className={`h-2 bg-blue-600 whitespace-nowrap p-4 rounded-md flex items-center`}
+                      className={`h-2 bg-blue-600 whitespace-nowrap md:p-4 lg:p-4 p-3 rounded-md flex items-center`}
                     >
-                      <Label htmlFor="progress">{item.name}</Label>
+                      <Label
+                        htmlFor="progress"
+                        className="md:text-base lg:text-base text-sm"
+                      >
+                        {item.name}
+                      </Label>
                     </div>
-                    <p>{item.value}%</p>
+                    <p className="md:text-base lg:text-base text-sm">
+                      {item.value}%
+                    </p>
                   </div>
                 ))}
               </div>

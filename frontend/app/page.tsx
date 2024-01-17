@@ -1,13 +1,17 @@
 "use client";
 
-import axios from "axios";
+import Axios from "axios";
+import { setupCache } from "axios-cache-interceptor";
 import { useState, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { TopSection } from "@/components/layout/main/dashboard/top-section";
 import { useUser, SignedIn, SignedOut } from "@clerk/nextjs";
 import { getAPIURL } from "@/hooks/api-url";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/main/dashboard/sidebar";
 import { Header } from "@/components/layout/main/dashboard/header";
+
+const instance = Axios.create();
+const axios = setupCache(instance);
 
 import {
   ColumnDef,
@@ -21,14 +25,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useCategories } from "@/hooks/use-categories";
-import { useCountryCodes } from "@/hooks/country-codes";
-import { CategoriesCN } from "./types/categories";
 
 import { Settings2, MoreHorizontal } from "lucide-react";
-import { Spinner } from "@/components/layout/animation/Spinner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -58,16 +57,6 @@ import {
 } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Wallet } from "lucide-react";
 
 export type Product = {
   id: string;
@@ -303,23 +292,22 @@ export default function Home() {
     setFormValue((prev) => ({ ...prev, isPending: true }));
 
     const url = getAPIURL();
-    axios
-      .post(
-        `${url}/api/upload`,
-        {
-          title: formValue.title,
-          category: formValue.category,
-          price: formValue.price,
-          code: formValue.code,
+    Axios.post(
+      `${url}/api/upload`,
+      {
+        title: formValue.title,
+        category: formValue.category,
+        price: formValue.price,
+        code: formValue.code,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          apikey: process.env.NEXT_PUBLIC_API_KEY,
+          userid: user.id,
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            apikey: process.env.NEXT_PUBLIC_API_KEY,
-            userid: user.id,
-          },
-        }
-      )
+      }
+    )
       .then(async (res) => {
         toast.success(res.data.data, {
           action: {
@@ -386,134 +374,11 @@ export default function Home() {
           />
           <div id="page" className="w-full h-screen">
             <section className="flex flex-col gap-4 w-full md:p-10 lg:p-10 p-2 md:px-32 lg:px-32 md:mt-0 lg:mt-0 mt-28">
-              <div id="top" className="flex flex-wrap justify-between">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button className="x bg-indigo-600 hover:bg-indigo-700 rounded flex gap-2">
-                      <Wallet /> Record Expense
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] bg-zinc-950 border border-zinc-700">
-                    <DialogHeader>
-                      <DialogTitle>Record an expense</DialogTitle>
-                    </DialogHeader>
-                    {/* add separator */}
-                    <Separator className="my-1 bg-zinc-500" />
-                    <div className="flex flex-col gap-4">
-                      <div className="flex flex-col gap-4">
-                        <Label htmlFor="name" className="">
-                          Title
-                        </Label>
-                        <Input
-                          id="name"
-                          autoComplete="off"
-                          type="text"
-                          placeholder="give your expense a name"
-                          className="col-span-3 placeholder:text-gray-400"
-                          disabled={formValue.isPending}
-                          onChange={(e) =>
-                            setFormValue({
-                              ...formValue,
-                              title: e.target.value,
-                            })
-                          }
-                          value={formValue.title}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-4">
-                        <Label htmlFor="username" className="">
-                          Categories
-                        </Label>
-                        <Select
-                          defaultValue={formValue.category}
-                          disabled={formValue.isPending}
-                          onValueChange={(value) =>
-                            setFormValue({ ...formValue, category: value })
-                          }
-                        >
-                          <SelectTrigger className="w-full text-gray-400">
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {useCategories().map((category: CategoriesCN) => (
-                              <SelectGroup key={category.key}>
-                                <SelectLabel>{category.key}</SelectLabel>
-                                {category.data.map((item) => (
-                                  <SelectItem key={item} value={item}>
-                                    {item}
-                                  </SelectItem>
-                                ))}
-                              </SelectGroup>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex flex-col gap-4">
-                        <Label htmlFor="price" className="">
-                          Price
-                        </Label>
-                        <div className="flex md:flex-row lg:flex-row flex-col gap-4">
-                          <Input
-                            id="price"
-                            autoComplete="off"
-                            type="number"
-                            placeholder="cost of the expense"
-                            className="col-span-3 placeholder:text-gray-400"
-                            disabled={formValue.isPending}
-                            onChange={(e) =>
-                              setFormValue({
-                                ...formValue,
-                                price: e.target.value,
-                              })
-                            }
-                            value={formValue.price}
-                          />
-                          <Select
-                            defaultValue={formValue.code}
-                            disabled={formValue.isPending}
-                            onValueChange={(value) =>
-                              setFormValue({ ...formValue, code: value })
-                            }
-                          >
-                            <SelectTrigger className="w-full text-gray-400">
-                              <SelectValue placeholder="currency code" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectGroup>
-                                <SelectLabel>Currency</SelectLabel>
-                                {useCountryCodes().map((country) => (
-                                  <SelectItem
-                                    key={country.code}
-                                    value={country.code}
-                                  >
-                                    {country.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        type="submit"
-                        className="bg-indigo-700 hover:bg-indigo-600 flex items-center gap-2 select-none"
-                        onClick={uploadData}
-                        disabled={formValue.isPending}
-                      >
-                        {formValue.isPending ? (
-                          <>
-                            <Spinner /> <span>Please wait</span>
-                          </>
-                        ) : (
-                          "Upload data"
-                        )}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
+              <TopSection
+                setFormValue={setFormValue}
+                formValue={formValue}
+                uploadData={uploadData}
+              />
               <div id="middle">
                 <hgroup>
                   <h2 className="text-xl font-medium">Expense table</h2>
