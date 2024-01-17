@@ -2,17 +2,6 @@
 import { buildClient } from "@xata.io/client";
 const tables = [
     {
-        name: "users",
-        columns: [
-            { name: "userid", type: "string" },
-            { name: "username", type: "string" },
-            { name: "completed", type: "int" },
-            { name: "total-product", type: "int" },
-            { name: "email", type: "string" },
-            { name: "fullname", type: "string" },
-        ],
-    },
-    {
         name: "products",
         columns: [
             { name: "platform", type: "string" },
@@ -21,15 +10,6 @@ const tables = [
             { name: "url", type: "string" },
             { name: "productID", type: "string" },
             { name: "userid", type: "string" },
-        ],
-    },
-    {
-        name: "usage",
-        columns: [
-            { name: "userid", type: "string" },
-            { name: "username", type: "string" },
-            { name: "usage", type: "int" },
-            { name: "limit", type: "int" },
         ],
     },
     {
@@ -43,10 +23,23 @@ const tables = [
             { name: "date", type: "string" },
         ],
     },
+    {
+        name: "account",
+        columns: [
+            { name: "userid", type: "string" },
+            { name: "username", type: "string" },
+            { name: "card_number", type: "string" },
+            { name: "budget", type: "string" },
+            { name: "card_name", type: "string" },
+            { name: "expiry", type: "string" },
+            { name: "cvv", type: "string" },
+            { name: "code", type: "string" },
+        ],
+    },
 ];
 const DatabaseClient = buildClient();
 const defaultOptions = {
-    databaseURL: "https://Timi-s-workspace-eouder.us-east-1.xata.sh/db/wishme",
+    databaseURL: "https://Timi-s-workspace-eouder.us-east-1.xata.sh/db/expi",
 };
 export class XataClient extends DatabaseClient {
     constructor(options) {

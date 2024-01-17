@@ -1,0 +1,48 @@
+---
+interface Props {
+  title: string;
+  firstLink: string;
+  secondLink: string;
+}
+import { Button } from "./ui/button";
+import { ExternalLink, CalendarDays } from "lucide-react";
+
+const { title, firstLink, secondLink } = Astro.props;
+---
+
+<section
+  class="flex md:flex-row lg:flex-row flex-col p-4 items-center justify-center gap-3 w-full"
+>
+  <div class="flex flex-col gap-5">
+    <h1 class="md:text-7xl lg:text-7xl text-5xl font-bold">
+      {title}
+    </h1>
+    <p class="text-xl text-neutral-700">
+      A clean and easy way to track your expenses. <br /> Expi is a simple expense
+      tracker to help you save money.
+    </p>
+    <div class="flex md:flex-row lg:flex-row gap-3 flex-col">
+      <a href={firstLink} class="w-full md:max-w-56 lg:max-w-56">
+        <Button
+          className="text-lg font-normal p-6 w-full flex gap-1 rounded border-2 border-transparent"
+        >
+          Get Started <ExternalLink className="w-4 h-4" />
+        </Button>
+      </a>
+      <a href={secondLink} class="w-full md:max-w-56 lg:max-w-56">
+        <Button
+          className="text-lg font-normal p-6 w-full flex gap-1 bg-transparent hover:bg-slate-50 border-2 border-black text-black rounded"
+        >
+          Book Demo <CalendarDays className="w-4 h-4" />
+        </Button>
+      </a>
+    </div>
+  </div>
+  <div id="image" class="w-full max-w-xl h-full md:block lg:block hidden">
+    <img
+      src="/heroImage.png"
+      alt="Moon Man Illustration"
+      class="w-auto h-auto object-cover"
+    />
+  </div>
+</section>

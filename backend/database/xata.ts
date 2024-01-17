@@ -8,17 +8,6 @@ import type {
 
 const tables = [
   {
-    name: "users",
-    columns: [
-      { name: "userid", type: "string" },
-      { name: "username", type: "string" },
-      { name: "completed", type: "int" },
-      { name: "total-product", type: "int" },
-      { name: "email", type: "string" },
-      { name: "fullname", type: "string" },
-    ],
-  },
-  {
     name: "products",
     columns: [
       { name: "platform", type: "string" },
@@ -27,15 +16,6 @@ const tables = [
       { name: "url", type: "string" },
       { name: "productID", type: "string" },
       { name: "userid", type: "string" },
-    ],
-  },
-  {
-    name: "usage",
-    columns: [
-      { name: "userid", type: "string" },
-      { name: "username", type: "string" },
-      { name: "usage", type: "int" },
-      { name: "limit", type: "int" },
     ],
   },
   {
@@ -49,34 +29,43 @@ const tables = [
       { name: "date", type: "string" },
     ],
   },
+  {
+    name: "account",
+    columns: [
+      { name: "userid", type: "string" },
+      { name: "username", type: "string" },
+      { name: "card_number", type: "string" },
+      { name: "budget", type: "string" },
+      { name: "card_name", type: "string" },
+      { name: "expiry", type: "string" },
+      { name: "cvv", type: "string" },
+      { name: "code", type: "string" },
+    ],
+  },
 ] as const;
 
 export type SchemaTables = typeof tables;
 export type InferredTypes = SchemaInference<SchemaTables>;
 
-export type Users = InferredTypes["users"];
-export type UsersRecord = Users & XataRecord;
-
 export type Products = InferredTypes["products"];
 export type ProductsRecord = Products & XataRecord;
-
-export type Usage = InferredTypes["usage"];
-export type UsageRecord = Usage & XataRecord;
 
 export type Expense = InferredTypes["expense"];
 export type ExpenseRecord = Expense & XataRecord;
 
+export type Account = InferredTypes["account"];
+export type AccountRecord = Account & XataRecord;
+
 export type DatabaseSchema = {
-  users: UsersRecord;
   products: ProductsRecord;
-  usage: UsageRecord;
   expense: ExpenseRecord;
+  account: AccountRecord;
 };
 
 const DatabaseClient = buildClient();
 
 const defaultOptions = {
-  databaseURL: "https://Timi-s-workspace-eouder.us-east-1.xata.sh/db/wishme",
+  databaseURL: "https://Timi-s-workspace-eouder.us-east-1.xata.sh/db/expi",
 };
 
 export class XataClient extends DatabaseClient<DatabaseSchema> {

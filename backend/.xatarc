@@ -1,5 +1,5 @@
 {
-  "databaseURL": "https://Timi-s-workspace-eouder.us-east-1.xata.sh/db/wishme",
+  "databaseURL": "https://Timi-s-workspace-eouder.us-east-1.xata.sh/db/expi",
   "codegen": {
     "output": "database/xata.ts"
   }

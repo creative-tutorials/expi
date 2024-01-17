@@ -20,7 +20,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CreditCard } from "lucide-react";
-import { User, BarChart2, LogOut } from "lucide-react";
+import { User, BarChart2, LogOut, PiggyBank } from "lucide-react";
 
 export function Sidebar({ isSignedIn, imageUrl, fullName }: SidebarProps) {
   const router = useRouter();
@@ -42,6 +42,18 @@ export function Sidebar({ isSignedIn, imageUrl, fullName }: SidebarProps) {
             </TooltipTrigger>
             <TooltipContent>
               <p>Analytics</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/account/budget">
+                <PiggyBank />
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Budget</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": "F:/Code 2024/monorepos/expi/website",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "extends": "astro/tsconfigs/strict"
+}

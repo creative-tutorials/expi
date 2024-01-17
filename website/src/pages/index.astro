@@ -1,0 +1,99 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/Card.astro";
+import Home from "@/components/Home.astro";
+import Header from "@/components/Header.astro";
+import { Briefcase, Database, Zap } from "lucide-react";
+import { ViewTransitions } from "astro:transitions";
+import "@/styles/globals.css";
+---
+
+<Layout title="Expi - Simple Expense Tracker">
+  <main>
+    <Header
+      title="Expi"
+      firstLink="/#features"
+      secondLink="https://x.com/timi_networks"
+      thirdLink="/pricing"
+    />
+    <div
+      class="md:p-20 lg:p-20 md:mt-8 lg:mt-8 mt-28 flex flex-col gap-28"
+      data-tag="sections-wrapper"
+    >
+      <Home
+        title="Makes Saving Money Much Easier"
+        firstLink="https://expi.vercel.app"
+        secondLink="https://cal.com/timidev/expi"
+      />
+      <ViewTransitions />
+      <section class="w-full p-4" id="features">
+        <div id="top-level-text" class="flex flex-col gap-4">
+          <h2 class="md:text-5xl lg:text-5xl text-3xl font-bold">
+            Everything you need to stay <br /> up to date on your costs
+          </h2>
+          <p class="md:text-xl lg:text-xl text-lg text-neutral-700">
+            Expi comes with somethings you are already familiar with excel. Expi
+            automates the boring stuff, <br /> so you can have time to focus on what
+            matters.
+          </p>
+        </div>
+        <div id="categorical-features" class="flex gap-4 flex-wrap w-full mt-8">
+          <div
+            id="7bpkt"
+            class="md:p-5 lg:p-5 p-2 flex flex-col gap-3 w-full md:max-w-[26rem] lg:max-w-[26rem] rounded-md bg-transparent"
+          >
+            <div id="top-text" class="flex items-center gap-2">
+              <div class="p-2 bg-black rounded-full">
+                <Briefcase className="w-4 h-4 text-white" />
+              </div>
+              <p class="text-xl font-semibold">Bring Your Excel Data</p>
+            </div>
+            <div id="bottom-text" class="px-7">
+              <span class="md:text-lg lg:text-lg text-gray-500">
+                Build in excel or google sheets and bring it right to expi for
+                easy analyzing
+              </span>
+            </div>
+          </div>
+          <div
+            id="qLAAw"
+            class="md:p-5 lg:p-5 p-2 flex flex-col gap-3 w-full md:max-w-[26rem] lg:max-w-[26rem] rounded-md bg-transparent"
+          >
+            <div id="top-text" class="flex items-center gap-2">
+              <div class="p-2 bg-black rounded-full">
+                <Database className="w-4 h-4 text-white" />
+              </div>
+              <p class="text-xl font-semibold">On-Demand Analysis</p>
+            </div>
+            <div id="bottom-text" class="px-7">
+              <span class="md:text-lg lg:text-lg text-gray-500">
+                Need a better way to analyze your expenses? Expi can
+                automatically analyze your data with simple charts.
+              </span>
+            </div>
+          </div>
+          <div
+            id="gv5XS"
+            class="md:p-5 lg:p-5 p-2 flex flex-col gap-3 w-full md:max-w-[26rem] lg:max-w-[26rem] rounded-md bg-transparent"
+          >
+            <div id="top-text" class="flex items-center gap-2">
+              <div class="p-2 bg-black rounded-full">
+                <Zap className="w-4 h-4 text-white" />
+              </div>
+              <p class="text-xl font-semibold">Fast User Experience</p>
+            </div>
+            <div id="bottom-text" class="px-7">
+              <span class="md:text-lg lg:text-lg text-gray-500">
+                Expi is designed to be fast and easy to use. Even the average
+                user can get Expi up and running in a matter of seconds.
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="flex items-center justify-center p-5">
+      <Card title="Track expenses better" href="https://expi.vercel.app" />
+    </div>
+  </main>
+</Layout>

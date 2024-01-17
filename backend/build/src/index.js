@@ -7,9 +7,9 @@ import bodyParser from "body-parser";
 import { UploadExpense } from "../function/expense/upload.js";
 import { fetchExpenses } from "../function/expense/fetch.js";
 import { deleteExpense } from "../function/expense/delete.js";
-import { validateBill } from "../function/bill/validate.js";
-import { incrementUsage } from "../function/bill/increment.js";
-import { createNewInvoice } from "../function/bill/create-invoice.js";
+import { createBudget } from "../function/budget/create.js";
+import { updateBudget } from "../function/budget/update.js";
+import { getBudget } from "../function/budget/fetch.js";
 const allowedOrigins = JSON.parse(process.env.ALLOWED_ORIGINS);
 const corsOptions = {
     origin: allowedOrigins,
@@ -23,13 +23,45 @@ app.use(bodyParser.urlencoded({ limit: "500kb", extended: false }));
 const port = process.env.PORT;
 if (!port)
     throw new Error("Port not found");
-const validateAuth = (req, res, next) => {
+const validateAPIKey = (req, res, next) => {
     const { apikey, userid } = req.headers;
     const serverKey = process.env.SERVER_APIKEY;
     if (apikey === serverKey || userid)
         next();
     else
         res.status(401).send({ error: "Unauthorized" });
+};
+const checkFieldValue = (req, res, next) => {
+    const { title, category, price, code } = req.body;
+    if (!title || !category || !price || !code) {
+        res.status(400).send({ error: "one or more fields are missing" });
+    }
+    else {
+        next();
+    }
+};
+const validateRecID = (req, res, next) => {
+    const { id } = req.params;
+    if (!id)
+        res.status(400).send({ error: "id is missing" });
+    else
+        next();
+};
+const validateUserAuth = (req, res, next) => {
+    const { userid } = req.headers;
+    if (!userid)
+        res.status(401).send({ error: "Unauthorized! User does not exist" });
+    else
+        next();
+};
+const checkBudgetReq = (req, res, next) => {
+    const { username, budget, code } = req.body;
+    if (!username || !budget || !code) {
+        res.status(400).send({ error: "one or more fields are missing" });
+    }
+    else {
+        next();
+    }
 };
 const reqLimiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes api rate limit
@@ -49,35 +81,7 @@ const resLimiter = rateLimit({
 app.get("/status", async (_, res) => {
     res.send("OK");
 });
-const checkFieldValue = (req, res, next) => {
-    const { title, category, price, code } = req.body;
-    if (!title || !category || !price || !code) {
-        res.status(400).send({ error: "one or more fields are missing" });
-    }
-    else {
-        next();
-    }
-};
-const checkRecordField = (req, res, next) => {
-    const { id } = req.params;
-    if (!id) {
-        res.status(400).send({ error: "id is missing" });
-    }
-    else {
-        next();
-    }
-};
-const checkBillRequest = (req, res, next) => {
-    const { userid } = req.params;
-    const { username } = req.body;
-    if (!userid || !username) {
-        res.status(400).send({ error: "userid or username is missing" });
-    }
-    else {
-        next();
-    }
-};
-app.post("/api/upload", reqLimiter, validateAuth, checkFieldValue, async (req, res) => {
+app.post("/api/upload", reqLimiter, validateAPIKey, checkFieldValue, async (req, res) => {
     const { title, category, price, code } = req.body;
     const { userid } = req.headers;
     try {
@@ -90,18 +94,18 @@ app.post("/api/upload", reqLimiter, validateAuth, checkFieldValue, async (req, r
         console.log("err", err);
     }
 });
-app.get("/api/expense", resLimiter, validateAuth, async (req, res) => {
+app.get("/api/expense", resLimiter, validateAPIKey, async (req, res) => {
     const { userid } = req.headers;
     try {
         const data = await fetchExpenses(userid);
-        res.send(data);
+        res.status(201).send(data);
     }
     catch (err) {
         console.log("err", err);
         res.status(500).send({ error: err.message });
     }
 });
-app.delete("/api/expense/:id", reqLimiter, validateAuth, checkRecordField, async (req, res) => {
+app.delete("/api/expense/:id", reqLimiter, validateAPIKey, validateRecID, async (req, res) => {
     const { id } = req.params;
     try {
         const data = await deleteExpense(id);
@@ -113,22 +117,31 @@ app.delete("/api/expense/:id", reqLimiter, validateAuth, checkRecordField, async
         console.log(err);
     }
 });
-app.post("/api/bill/:userid", reqLimiter, validateAuth, checkBillRequest, async (req, res) => {
-    const { userid } = req.params;
-    const { username } = req.body;
+app.post("/api/budget", reqLimiter, validateAPIKey, validateUserAuth, checkBudgetReq, async (req, res) => {
+    const { userid } = req.headers;
+    const { username, budget, code } = req.body;
     try {
-        const isValidBill = await validateBill(userid, username);
-        if (isValidBill) {
-            const incrementResult = await incrementUsage(userid);
-            res.send({ result: incrementResult });
+        // if budget data exist then update, else create
+        const existingBudget = await getBudget(userid);
+        if (existingBudget) {
+            const updatedBudget = await updateBudget(userid, budget);
+            res.send({ updatedBudget });
         }
-        else {
-            const newInvoice = await createNewInvoice(userid, username);
-            res.send({ invoice: newInvoice });
-        }
+        const createdBudget = await createBudget(userid, username, budget, code);
+        res.status(201).send({ createdBudget }); //* 201 created
+    }
+    catch (err) {
+        console.log(err);
+    }
+});
+app.get("/api/budget", resLimiter, validateAPIKey, validateUserAuth, async (req, res) => {
+    const { userid } = req.headers;
+    try {
+        const data = await getBudget(userid);
+        res.send({ data });
     }
     catch (error) {
-        console.error(error);
+        console.log(error);
     }
 });
 app.listen(port, () => {

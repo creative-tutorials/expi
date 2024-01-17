@@ -1,0 +1,29 @@
+---
+interface Props {
+  title: string;
+  href: string;
+}
+import { Button } from "./ui/button";
+
+const { title, href } = Astro.props;
+---
+
+<div
+  class="x bg-zinc-950 p-5 rounded-lg text-white w-full max-w-4xl flex flex-col gap-5 text-center items-center justify-center"
+>
+  <h2 class="md:text-5xl lg:text-5xl text-4xl">
+    {title}
+    <!-- <span>&rarr;</span> -->
+  </h2>
+  <p class="text-gray-400 md:text-base lg:text-base text-sm">
+    A better look than excel or google sheets. Expi also exports your data in
+    CSV or JSON format, <br /> so you can easily view it in your favorite tools.
+  </p>
+  <a href={href}>
+    <Button
+      className="bg-white hover:bg-slate-50 font-normal rounded-md text-black text-lg p-6 px-6"
+    >
+      Get Started
+    </Button>
+  </a>
+</div>

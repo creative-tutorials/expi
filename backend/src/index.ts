@@ -10,10 +10,9 @@ import bodyParser from "body-parser";
 import { UploadExpense } from "../function/expense/upload.js";
 import { fetchExpenses } from "../function/expense/fetch.js";
 import { deleteExpense } from "../function/expense/delete.js";
-
-import { validateBill } from "../function/bill/validate.js";
-import { incrementUsage } from "../function/bill/increment.js";
-import { createNewInvoice } from "../function/bill/create-invoice.js";
+import { createBudget } from "../function/budget/create.js";
+import { updateBudget } from "../function/budget/update.js";
+import { getBudget } from "../function/budget/fetch.js";
 
 const allowedOrigins = JSON.parse(process.env.ALLOWED_ORIGINS!);
 const corsOptions = {
@@ -36,11 +35,45 @@ type CustomHeaders = IncomingHttpHeaders & {
   userid: string;
 };
 
-const validateAuth = (req: Request, res: Response, next: NextFunction) => {
+const validateAPIKey = (req: Request, res: Response, next: NextFunction) => {
   const { apikey, userid } = req.headers as CustomHeaders;
   const serverKey = process.env.SERVER_APIKEY;
   if (apikey === serverKey || userid) next();
   else res.status(401).send({ error: "Unauthorized" });
+};
+
+const checkFieldValue = (req: Request, res: Response, next: NextFunction) => {
+  const { title, category, price, code }: Item = req.body;
+
+  if (!title || !category || !price || !code) {
+    res.status(400).send({ error: "one or more fields are missing" });
+  } else {
+    next();
+  }
+};
+
+const validateRecID = (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  if (!id) res.status(400).send({ error: "id is missing" });
+  else next();
+};
+
+const validateUserAuth = (req: Request, res: Response, next: NextFunction) => {
+  const { userid } = req.headers as CustomHeaders;
+
+  if (!userid)
+    res.status(401).send({ error: "Unauthorized! User does not exist" });
+  else next();
+};
+
+const checkBudgetReq = (req: Request, res: Response, next: NextFunction) => {
+  const { username, budget, code }: BudgetReq = req.body;
+
+  if (!username || !budget || !code) {
+    res.status(400).send({ error: "one or more fields are missing" });
+  } else {
+    next();
+  }
 };
 
 const reqLimiter = rateLimit({
@@ -72,44 +105,10 @@ type Item = {
   code: string;
 };
 
-type Bill = {
-  username: string;
-};
-
-const checkFieldValue = (req: Request, res: Response, next: NextFunction) => {
-  const { title, category, price, code }: Item = req.body;
-
-  if (!title || !category || !price || !code) {
-    res.status(400).send({ error: "one or more fields are missing" });
-  } else {
-    next();
-  }
-};
-
-const checkRecordField = (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.params;
-  if (!id) {
-    res.status(400).send({ error: "id is missing" });
-  } else {
-    next();
-  }
-};
-
-const checkBillRequest = (req: Request, res: Response, next: NextFunction) => {
-  const { userid } = req.params;
-  const { username }: Bill = req.body;
-
-  if (!userid || !username) {
-    res.status(400).send({ error: "userid or username is missing" });
-  } else {
-    next();
-  }
-};
-
 app.post(
   "/api/upload",
   reqLimiter,
-  validateAuth,
+  validateAPIKey,
   checkFieldValue,
   async (req: Request, res: Response) => {
     const { title, category, price, code }: Item = req.body;
@@ -128,14 +127,14 @@ app.post(
 app.get(
   "/api/expense",
   resLimiter,
-  validateAuth,
+  validateAPIKey,
   async (req: Request, res: Response) => {
     const { userid } = req.headers as CustomHeaders;
 
     try {
       const data = await fetchExpenses(userid);
 
-      res.send(data);
+      res.status(201).send(data);
     } catch (err: any) {
       console.log("err", err);
       res.status(500).send({ error: err.message });
@@ -146,8 +145,8 @@ app.get(
 app.delete(
   "/api/expense/:id",
   reqLimiter,
-  validateAuth,
-  checkRecordField,
+  validateAPIKey,
+  validateRecID,
   async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -161,27 +160,48 @@ app.delete(
   }
 );
 
+type BudgetReq = Item & {
+  username: string;
+  budget: string;
+};
+
 app.post(
-  "/api/bill/:userid",
+  "/api/budget",
   reqLimiter,
-  validateAuth,
-  checkBillRequest,
+  validateAPIKey,
+  validateUserAuth,
+  checkBudgetReq,
   async (req: Request, res: Response) => {
-    const { userid } = req.params;
-    const { username }: Bill = req.body;
+    const { userid } = req.headers as CustomHeaders;
+    const { username, budget, code }: BudgetReq = req.body;
 
     try {
-      const isValidBill = await validateBill(userid, username);
-
-      if (isValidBill) {
-        const incrementResult = await incrementUsage(userid);
-        res.send({ result: incrementResult });
-      } else {
-        const newInvoice = await createNewInvoice(userid, username);
-        res.send({ invoice: newInvoice });
+      // if budget data exist then update, else create
+      const existingBudget = await getBudget(userid);
+      if (existingBudget) {
+        const updatedBudget = await updateBudget(userid, budget);
+        res.send({ updatedBudget });
       }
+      const createdBudget = await createBudget(userid, username, budget, code);
+      res.status(201).send({ createdBudget }); //* 201 created
+    } catch (err) {
+      console.log(err);
+    }
+  }
+);
+
+app.get(
+  "/api/budget",
+  resLimiter,
+  validateAPIKey,
+  validateUserAuth,
+  async (req: Request, res: Response) => {
+    const { userid } = req.headers as CustomHeaders;
+    try {
+      const data = await getBudget(userid);
+      res.send({ data });
     } catch (error) {
-      console.error(error);
+      console.log(error);
     }
   }
 );

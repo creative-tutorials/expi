@@ -21,21 +21,17 @@ export default function Page() {
 
   return (
     <>
-      {isLoading ? (
-        <p>Loading ...</p>
-      ) : (
-        <main className="w-full h-screen md:flex lg:flex">
-          <Sidebar />
-          <div id="page" className="p-10 w-full">
-            <section id="notifications">
-              <hgroup className="flex flex-col gap-2">
-                <h1 className="text-2xl font-medium">Notifications</h1>
-                <span>Update your notifications settings and preferences</span>
-              </hgroup>
-            </section>
-          </div>
-        </main>
-      )}
+      <main className="w-full h-screen md:flex lg:flex">
+        <Sidebar title="Notifications" />
+        <div id="page" className="p-10 w-full">
+          <section id="notifications">
+            <hgroup className="flex flex-col gap-2">
+              <h1 className="text-2xl font-medium">Notifications</h1>
+              <span>Update your notifications settings and preferences</span>
+            </hgroup>
+          </section>
+        </div>
+      </main>
     </>
   );
 }

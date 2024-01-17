@@ -6,16 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Sidebar } from "@/components/layout/main/account/sidebar";
+import { Footer } from "@/components/layout/main/account/footer";
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Profile } from "@/components/layout/main/account/profile";
-import { UserRound, PiggyBank, BellDot, Home } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 
 export default function Page() {
@@ -49,85 +44,20 @@ export default function Page() {
     return () => clearTimeout(timer);
   }, [user]);
 
-  if (isLoading) {
-    return <p>Loading ...</p>;
-  }
-
   return (
     <>
       <main className="w-full h-screen md:flex lg:flex">
-        <Sidebar />
-        <Content setIsModal={setIsModal} userX={userX} />
+        <Sidebar title="Account" />
+        {isLoading ? (
+          <div>fetching account details...</div>
+        ) : (
+          <Content setIsModal={setIsModal} userX={userX} />
+        )}
 
         <Footer />
         {isModal && <Profile setIsModal={setIsModal} />}
       </main>
     </>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="md:hidden lg:hidden block fixed bottom-12 left-1/2 right-1/2 -translate-x-1/2 translate-y-1/2 w-full max-w-sm rounded-md bg-zinc-950 border border-zinc-800 shadow-md p-5">
-      <div id="icons" className="flex items-center justify-between">
-        <div id="icon">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/account">
-                  <UserRound className="w-8" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Account</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <div id="icon">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/account/budget">
-                  <PiggyBank className="w-8" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Budget</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <div id="icon">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/account/notifications">
-                  <BellDot className="w-8" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Notifications</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <div id="icon">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/">
-                  <Home className="w-8" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Home</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </div>
-    </footer>
   );
 }
 
@@ -140,7 +70,7 @@ function Content(props: {
   setIsModal: (arg0: boolean) => void;
 }) {
   return (
-    <div id="page" className="p-10 w-full">
+    <div id="page" className="md:p-10 lg:p-10 p-4 w-full">
       <section id="account-management">
         <hgroup className="flex flex-col gap-2">
           <h1 className="text-2xl font-medium">Account Management</h1>
