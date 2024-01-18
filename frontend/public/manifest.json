@@ -460,6 +460,5 @@
   "lang": "en",
   "categories": ["personalization", "productivity", "shopping"],
   "description": "Expi is a simple expense tracker that makes it easy to manage your expenses",
-  "id": "/",
-  "scope": "https://expi.vercel.app"
+  "id": "/"
 }

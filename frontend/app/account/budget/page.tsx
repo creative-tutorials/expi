@@ -1,57 +1,20 @@
 "use client";
-import Axios from "axios";
-import { setupCache } from "axios-cache-interceptor";
+import axios from "axios";
 import { useUser } from "@clerk/nextjs";
 import { getAPIURL } from "@/hooks/api-url";
-import { useCountryCodes } from "@/hooks/country-codes";
+
+import { AccountContent } from "@/components/layout/main/account/account-content";
 import { AccountInfo } from "@/app/types/account";
 import { Sidebar } from "@/components/layout/main/account/sidebar";
 import { Footer } from "@/components/layout/main/account/footer";
-import { Button } from "@/components/ui/button";
+
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { Eye, EyeOff, Clipboard, ClipboardCheckIcon, Ban } from "lucide-react";
+import { Ban } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
+import { CreditCard } from "@/components/layout/main/account/credit-card";
+
 import { Label } from "@/components/ui/label";
-
-const instance = Axios.create();
-const axios = setupCache(instance);
-
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const imageArr = [
-  "card1.jpg",
-  "card2.jpeg",
-  "card3.jpg",
-  "card4.jpg",
-  "card5.jpg",
-  "card6.jpg",
-  "card7.jpg",
-  "card8.jpg",
-  "card9.jpg",
-  "card10.jpg",
-  "card11.jpg",
-  "card12.jpg",
-  "card13.jpg",
-];
 
 export default function Cloud() {
   const { user, isSignedIn } = useUser();
@@ -72,12 +35,6 @@ export default function Cloud() {
     isPending: false,
   });
   const [expenseData, setExpenseData] = useState([]);
-  const [isCopied, setIsCopied] = useState(false);
-  const [cardImage, setCardImage] = useState("card1.jpg");
-  const [isHidden, setIsHidden] = useState(true);
-  const [rotationX, setRotationX] = useState(0);
-  const [rotationY, setRotationY] = useState(0);
-
   const generateChartData = (data: { name: string; value: number }[]) => {
     const total = data.reduce((acc, item) => amtx + item.value, 0);
     const chartData = data.map((item) => ({
@@ -157,51 +114,26 @@ export default function Cloud() {
       });
   };
 
-  const handleMouseEnter = () => {};
-  const handleMouseLeave = () => {
-    // reset rotation
-    setRotationX(0);
-    setRotationY(0);
-  };
-
-  const handleMouseMove = (e: {
-    currentTarget: { getBoundingClientRect: () => any };
-    clientY: number;
-    clientX: number;
-  }) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const cardCenterX = rect.left + rect.width / 2;
-    const cardCenterY = rect.top + rect.height / 2;
-    const newRotationX = (e.clientY - cardCenterY) / 10;
-    const newRotationY = (e.clientX - cardCenterX) / 10;
-    setRotationX(newRotationX);
-    setRotationY(newRotationY);
-  };
-
-  const randomCardImage = () => {
-    const randomIndex = Math.floor(Math.random() * imageArr.length);
-    setCardImage(imageArr[randomIndex]);
-  };
-
   const uploadData = async () => {
     if (!isSignedIn) return;
     setFormValue((prev) => ({ ...prev, isPending: true }));
     const url = getAPIURL();
-    Axios.post(
-      `${url}/api/budget`,
-      {
-        username: user.firstName + " " + user.lastName,
-        budget: formValue.amount,
-        code: formValue.code,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          apikey: process.env.NEXT_PUBLIC_API_KEY,
-          userid: user.id,
+    axios
+      .post(
+        `${url}/api/budget`,
+        {
+          username: user.firstName + " " + user.lastName,
+          budget: formValue.amount,
+          code: formValue.code,
         },
-      }
-    )
+        {
+          headers: {
+            "Content-Type": "application/json",
+            apikey: process.env.NEXT_PUBLIC_API_KEY,
+            userid: user.id,
+          },
+        }
+      )
       .then(async (res) => {
         const data = res.data;
 
@@ -221,25 +153,6 @@ export default function Cloud() {
       });
   };
 
-  const copyText = () => {
-    try {
-      navigator.clipboard.writeText(account.card_number);
-      setIsCopied(true);
-      setTimeout(() => {
-        setIsCopied(false);
-      }, 800);
-    } catch (err) {
-      console.error(err);
-      toast.error("Error copying text", {
-        action: {
-          label: "Retry",
-          onClick: () => copyText(),
-        },
-      });
-      setIsCopied(false);
-    }
-  };
-
   return (
     <main className="w-full h-screen md:flex lg:flex">
       <Sidebar title={"Budget"} />
@@ -247,158 +160,13 @@ export default function Cloud() {
         id="page"
         className="md:p-10 lg:p-10 p-2 w-full h-screen max-h-min overflow-auto"
       >
-        <div
-          id="top"
-          className="flex md:gap-0 lg:gap-0 gap-3 px-2 flex-wrap items-center justify-between"
-        >
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-indigo-600 hover:bg-indigo-700">
-                Add Budget
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add Budget</DialogTitle>
-                <DialogDescription>
-                  Enter your budget and country code
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="flex flex-col items-start gap-3">
-                  <Label htmlFor="number" className="text-right">
-                    Amount of your budget
-                  </Label>
-                  <Input
-                    id="number"
-                    placeholder="Budget amount"
-                    type="number"
-                    value={formValue.amount}
-                    min="0"
-                    className="col-span-3"
-                    autoComplete="off"
-                    disabled={formValue.isPending}
-                    onChange={(e) =>
-                      setFormValue({ ...formValue, amount: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="w-full">
-                  <Select
-                    defaultValue={formValue.code}
-                    disabled={formValue.isPending}
-                    onValueChange={(value) =>
-                      setFormValue({ ...formValue, code: value })
-                    }
-                  >
-                    <SelectTrigger className="w-full text-gray-400">
-                      <SelectValue placeholder="currency code" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Currency</SelectLabel>
-                        {useCountryCodes().map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  className="border border-gray-500 hover:bg-gray-800 hover:border-gray-700"
-                  type="submit"
-                  disabled={formValue.isPending}
-                  onClick={uploadData}
-                >
-                  {formValue.isPending ? "Saving changes..." : "Save changes"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <div id="budget_nexus">
-            <h1 className="md:text-2xl lg:text-2xl text-lg font-medium">
-              <span>
-                {account.budget ? account.budget : "Loading amount..."}
-              </span>
-            </h1>
-          </div>
-        </div>
-        <div
-          id="card"
-          className="p-4 mt-8 w-full bg-cover md:h-full lg:h-full h-56 md:max-h-[300px] lg:max-h-[300px] md:max-w-[500px] lg:max-w-[500px] relative flex items-center justify-center rounded-lg shadow-md"
-          style={{
-            backgroundImage: `url('/credit card/${cardImage}')`,
-            filter: "grayscale(100%)",
-            transition: "transform 0.3s",
-            transformStyle: "preserve-3d",
-            transform: `perspective(1000px) rotateX(${rotationX}deg) rotateY(${rotationY}deg)`,
-          }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onMouseMove={handleMouseMove}
-        >
-          <div id="open_close" className="absolute top-2 left-5">
-            {isHidden ? (
-              <EyeOff
-                className="cursor-pointer"
-                onClick={() => setIsHidden(false)}
-              />
-            ) : (
-              <Eye
-                className="cursor-pointer"
-                onClick={() => setIsHidden(true)}
-              />
-            )}
-          </div>
-          <div
-            id="mcard"
-            className="absolute top-2 right-5 cursor-pointer"
-            onClick={randomCardImage}
-          >
-            <svg
-              width="45"
-              height="45"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g fill="currentColor" fillRule="evenodd">
-                <circle cx="7" cy="12" r="7" />
-                <circle cx="17" cy="12" r="7" fillOpacity=".8" />
-              </g>
-            </svg>
-          </div>
-          <div id="card-info" className="mt-auto flex flex-col gap-4">
-            <div id="top-info" className="flex justify-between">
-              <h2 id="card-number" className="text-2xl font-medium select-none">
-                {isHidden ? "XXXX-XXXX-XXXX-XXXX" : account.card_number}
-              </h2>
-              {isCopied ? (
-                <ClipboardCheckIcon className="cursor-pointer w-4 h-4" />
-              ) : (
-                <Clipboard
-                  className="cursor-pointer w-4 h-4"
-                  onClick={copyText}
-                />
-              )}
-            </div>
-            <div
-              id="bottom-info"
-              className="flex justify-between"
-              onClick={copyText}
-            >
-              <h3 id="card-holder-name" className="select-none">
-                {account.card_name}
-              </h3>
-              <h3 id="card-expiry" className="select-none">
-                {account.expiry}
-              </h3>
-            </div>
-          </div>
-        </div>
+        <AccountContent
+          setFormValue={setFormValue}
+          formValue={formValue}
+          uploadData={uploadData}
+          account={account}
+        />
+        <CreditCard account={account} />
         <div id="expense-chart" className="mt-10">
           {expenseData.length < 1 && (
             <span className="flex items-center gap-1">

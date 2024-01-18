@@ -19,7 +19,7 @@ export async function deleteExpense(id) {
         return "Deleted successfully";
     }
     catch (error) {
-        throw new Error(error.message);
+        throw new Error(error);
     }
 }
 //# sourceMappingURL=delete.js.map

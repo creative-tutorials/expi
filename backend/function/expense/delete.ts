@@ -26,6 +26,6 @@ export async function deleteExpense(id: string): Promise<string> {
 
     return "Deleted successfully";
   } catch (error: any) {
-    throw new Error(error.message);
+    throw new Error(error);
   }
 }

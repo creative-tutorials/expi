@@ -42,14 +42,30 @@ const validateAPIKey = (req: Request, res: Response, next: NextFunction) => {
   else res.status(401).send({ error: "Unauthorized" });
 };
 
+const regex = /^[a-zA-Z0-9]+$/;
+
 const checkFieldValue = (req: Request, res: Response, next: NextFunction) => {
   const { title, category, price, code }: Item = req.body;
 
   if (!title || !category || !price || !code) {
-    res.status(400).send({ error: "one or more fields are missing" });
-  } else {
-    next();
+    return res.status(400).send({ error: "one or more fields are missing" });
   }
+
+  if (price <= "0") {
+    // price cannot be negative or equal to 0
+    return res
+      .status(400)
+      .send({ error: "price cannot be negative or equal to 0" });
+  }
+
+  if (!regex.test(price)) {
+    // price cannot contain special characters
+    return res
+      .status(400)
+      .send({ error: "price cannot contain special characters" });
+  }
+
+  return next();
 };
 
 const validateRecID = (req: Request, res: Response, next: NextFunction) => {
@@ -66,14 +82,28 @@ const validateUserAuth = (req: Request, res: Response, next: NextFunction) => {
   else next();
 };
 
-const checkBudgetReq = (req: Request, res: Response, next: NextFunction) => {
+const validateBudgetReq = (req: Request, res: Response, next: NextFunction) => {
   const { username, budget, code }: BudgetReq = req.body;
 
   if (!username || !budget || !code) {
-    res.status(400).send({ error: "one or more fields are missing" });
-  } else {
-    next();
+    return res.status(400).send({ error: "one or more fields are missing" });
   }
+
+  if (budget <= "0") {
+    // budget cannot be negative or equal to 0
+    return res
+      .status(400)
+      .send({ error: "budget cannot be negative or equal to 0" });
+  }
+
+  if (!regex.test(budget)) {
+    // budget cannot contain special characters
+    return res
+      .status(400)
+      .send({ error: "budget cannot contain special characters" });
+  }
+
+  return next();
 };
 
 const reqLimiter = rateLimit({
@@ -170,7 +200,7 @@ app.post(
   reqLimiter,
   validateAPIKey,
   validateUserAuth,
-  checkBudgetReq,
+  validateBudgetReq,
   async (req: Request, res: Response) => {
     const { userid } = req.headers as CustomHeaders;
     const { username, budget, code }: BudgetReq = req.body;
@@ -184,7 +214,8 @@ app.post(
       }
       const createdBudget = await createBudget(userid, username, budget, code);
       res.status(201).send({ createdBudget });
-    } catch (err) {
+    } catch (err: any) {
+      res.status(500).send({ error: err.message });
       console.log(err);
     }
   }
@@ -200,8 +231,9 @@ app.get(
     try {
       const data = await getBudget(userid);
       res.send({ data });
-    } catch (error) {
-      console.log(error);
+    } catch (err: any) {
+      res.status(500).send({ error: err.message });
+      console.log(err);
     }
   }
 );

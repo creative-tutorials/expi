@@ -50,8 +50,8 @@ export async function createBudget(
       throw new Error("Error occurred while intializing budget data");
     }
     return "Budget created";
-  } catch (err) {
-    console.log(err);
-    throw new Error("Error occurred while intializing budget data");
+  } catch (err: any) {
+    console.log("errDB", err);
+    throw new Error(err);
   }
 }

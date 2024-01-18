@@ -1,7 +1,6 @@
 "use client";
 
-import Axios from "axios";
-import { setupCache } from "axios-cache-interceptor";
+import axios from "axios";
 import { useState, useEffect } from "react";
 import { TopSection } from "@/components/layout/main/dashboard/top-section";
 import { useUser, SignedIn, SignedOut } from "@clerk/nextjs";
@@ -9,9 +8,6 @@ import { getAPIURL } from "@/hooks/api-url";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/layout/main/dashboard/sidebar";
 import { Header } from "@/components/layout/main/dashboard/header";
-
-const instance = Axios.create();
-const axios = setupCache(instance);
 
 import {
   ColumnDef,
@@ -292,22 +288,23 @@ export default function Home() {
     setFormValue((prev) => ({ ...prev, isPending: true }));
 
     const url = getAPIURL();
-    Axios.post(
-      `${url}/api/upload`,
-      {
-        title: formValue.title,
-        category: formValue.category,
-        price: formValue.price,
-        code: formValue.code,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          apikey: process.env.NEXT_PUBLIC_API_KEY,
-          userid: user.id,
+    axios
+      .post(
+        `${url}/api/upload`,
+        {
+          title: formValue.title,
+          category: formValue.category,
+          price: formValue.price,
+          code: formValue.code,
         },
-      }
-    )
+        {
+          headers: {
+            "Content-Type": "application/json",
+            apikey: process.env.NEXT_PUBLIC_API_KEY,
+            userid: user.id,
+          },
+        }
+      )
       .then(async (res) => {
         toast.success(res.data.data, {
           action: {

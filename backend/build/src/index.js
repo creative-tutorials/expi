@@ -31,14 +31,25 @@ const validateAPIKey = (req, res, next) => {
     else
         res.status(401).send({ error: "Unauthorized" });
 };
+const regex = /^[a-zA-Z0-9]+$/;
 const checkFieldValue = (req, res, next) => {
     const { title, category, price, code } = req.body;
     if (!title || !category || !price || !code) {
-        res.status(400).send({ error: "one or more fields are missing" });
+        return res.status(400).send({ error: "one or more fields are missing" });
     }
-    else {
-        next();
+    if (price <= "0") {
+        // price cannot be negative or equal to 0
+        return res
+            .status(400)
+            .send({ error: "price cannot be negative or equal to 0" });
     }
+    if (!regex.test(price)) {
+        // price cannot contain special characters
+        return res
+            .status(400)
+            .send({ error: "price cannot contain special characters" });
+    }
+    return next();
 };
 const validateRecID = (req, res, next) => {
     const { id } = req.params;
@@ -54,14 +65,24 @@ const validateUserAuth = (req, res, next) => {
     else
         next();
 };
-const checkBudgetReq = (req, res, next) => {
+const validateBudgetReq = (req, res, next) => {
     const { username, budget, code } = req.body;
     if (!username || !budget || !code) {
-        res.status(400).send({ error: "one or more fields are missing" });
+        return res.status(400).send({ error: "one or more fields are missing" });
     }
-    else {
-        next();
+    if (budget <= "0") {
+        // budget cannot be negative or equal to 0
+        return res
+            .status(400)
+            .send({ error: "budget cannot be negative or equal to 0" });
     }
+    if (!regex.test(budget)) {
+        // budget cannot contain special characters
+        return res
+            .status(400)
+            .send({ error: "budget cannot contain special characters" });
+    }
+    return next();
 };
 const reqLimiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes api rate limit
@@ -117,7 +138,7 @@ app.delete("/api/expense/:id", reqLimiter, validateAPIKey, validateRecID, async 
         console.log(err);
     }
 });
-app.post("/api/budget", reqLimiter, validateAPIKey, validateUserAuth, checkBudgetReq, async (req, res) => {
+app.post("/api/budget", reqLimiter, validateAPIKey, validateUserAuth, validateBudgetReq, async (req, res) => {
     const { userid } = req.headers;
     const { username, budget, code } = req.body;
     try {
@@ -131,6 +152,7 @@ app.post("/api/budget", reqLimiter, validateAPIKey, validateUserAuth, checkBudge
         res.status(201).send({ createdBudget });
     }
     catch (err) {
+        res.status(500).send({ error: err.message });
         console.log(err);
     }
 });
@@ -140,8 +162,9 @@ app.get("/api/budget", resLimiter, validateAPIKey, validateUserAuth, async (req,
         const data = await getBudget(userid);
         res.send({ data });
     }
-    catch (error) {
-        console.log(error);
+    catch (err) {
+        res.status(500).send({ error: err.message });
+        console.log(err);
     }
 });
 app.listen(port, () => {

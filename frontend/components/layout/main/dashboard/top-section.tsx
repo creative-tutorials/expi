@@ -123,7 +123,7 @@ export function TopSection({
                   id="price"
                   autoComplete="off"
                   type="number"
-                  min="0"
+                  min="1"
                   value={formValue.price}
                   placeholder="cost of the expense"
                   className="col-span-3 placeholder:text-gray-400"

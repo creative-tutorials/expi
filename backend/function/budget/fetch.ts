@@ -12,7 +12,8 @@ export async function getBudget(id: string) {
       throw new Error("No data found");
     }
     return data;
-  } catch (err) {
+  } catch (err: any) {
     console.log(err);
+    throw new Error(err);
   }
 }

@@ -37,8 +37,8 @@ export async function createBudget(userid, username, budget, code) {
         return "Budget created";
     }
     catch (err) {
-        console.log(err);
-        throw new Error("Error occurred while intializing budget data");
+        console.log("errDB", err);
+        throw new Error(err);
     }
 }
 //# sourceMappingURL=create.js.map

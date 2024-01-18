@@ -12,6 +12,7 @@ export async function getBudget(id) {
     }
     catch (err) {
         console.log(err);
+        throw new Error(err);
     }
 }
 //# sourceMappingURL=fetch.js.map
